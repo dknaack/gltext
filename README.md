@@ -1,4 +1,4 @@
-# gltext - Single-Header OpenGL Text Rendering Library
+# Single-Header OpenGL Text Rendering Library
 
 This is a single-header library for rendering text in OpenGL. It depends on
 FreeType and optionally the C standard library. You can remove the standard
