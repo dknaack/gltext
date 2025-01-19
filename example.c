@@ -1,11 +1,5 @@
 #define GLFW_INCLUDE_NONE
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <GLFW/glfw3.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 #define GLAD_GL_IMPLEMENTATION
 #define GLT_IMPL

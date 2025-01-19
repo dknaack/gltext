@@ -49,6 +49,10 @@ GLT_API void gltUseProgram(void);
 
 #ifdef GLT_IMPL
 
+#include <stdlib.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 static GLuint gltProgram;
 static FT_Face gltFonts[256];
 static GLuint gltFontCount = 1;
