@@ -56,6 +56,9 @@ keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods)
 }
 
 static GLuint gltProgram;
+static FT_Face gltFonts[256];
+static GLuint gltFontCount = 1;
+static GLuint gltCurrentFont;
 
 static GLuint
 gltCreateShader(GLenum type, const char *source)
@@ -161,8 +164,12 @@ gltDraw(GLTbuffer b)
 }
 
 static void
-gltPushText(GLTbuffer *b, char *text, GLTcache *cache, FT_Face face)
+gltPushText(GLTbuffer *b, char *text, GLTcache *cache)
 {
+	if (gltCurrentFont == 0) {
+		return;
+	}
+
 	if (!cache->textureAtlas) {
 		glGenTextures(1, &cache->textureAtlas);
 		glBindTexture(GL_TEXTURE_2D, cache->textureAtlas);
@@ -174,6 +181,7 @@ gltPushText(GLTbuffer *b, char *text, GLTcache *cache, FT_Face face)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 
+	FT_Face face = gltFonts[gltCurrentFont];
 	for (int c = 32; c < 127; c++) {
 		if (cache->glyphs[c].codepoint != 0) {
 			continue;
@@ -283,7 +291,37 @@ gltPushText(GLTbuffer *b, char *text, GLTcache *cache, FT_Face face)
 			b->indexCount += 6;
 		}
 	}
+}
 
+static GLuint
+gltCreateFont(char *filename, int pixelSize)
+{
+	static FT_Library ft;
+	static GLboolean isInitialized;
+	if (!isInitialized) {
+		if (FT_Init_FreeType(&ft)) {
+			fprintf(stderr, "Failed to initialize FreeType\n");
+		}
+	}
+
+	if (gltFontCount > 256) {
+		return 0;
+	}
+
+	GLuint id = gltFontCount++;
+	FT_Face *face = &gltFonts[id];
+	if (FT_New_Face(ft, filename, 0, face)) {
+		fprintf(stderr, "Failed to load font\n");
+	}
+
+	FT_Set_Pixel_Sizes(*face, 0, pixelSize);
+	return id;
+}
+
+static void
+gltBindFont(GLuint font)
+{
+	gltCurrentFont = font;
 }
 
 int main(void)
@@ -314,19 +352,8 @@ int main(void)
 	 * Initialize the text API
 	 */
 
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft)) {
-		fprintf(stderr, "Failed to initialize FreeType\n");
-	}
-
-	FT_Face face;
-	if (FT_New_Face(ft, "/usr/share/fonts/TTF/Arial.TTF", 0, &face)) {
-		fprintf(stderr, "Failed to load font\n");
-	}
-
-	FT_Set_Pixel_Sizes(face, 0, 16);
-
 	GLTcache cache = {0};
+	GLuint font = gltCreateFont("/usr/share/fonts/TTF/Arial.TTF", 16);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -344,7 +371,8 @@ int main(void)
 		char text[] = "Hello, world! This is a test.";
 
 		GLTbuffer buffer = {0};
-		gltPushText(&buffer, text, &cache, face);
+		gltBindFont(font);
+		gltPushText(&buffer, text, &cache);
 		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
