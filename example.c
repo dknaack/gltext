@@ -72,7 +72,6 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 		gltUseProgram();
 
-		gltOrtho(0, w, 0, h, -1, 1);
 		char text[] = "Hello, world! This is a test.";
 
 		GLTbuffer buffer = {0};

@@ -54,6 +54,7 @@ static FT_Face gltFonts[256];
 static GLuint gltFontCount = 1;
 static GLuint gltCurrentFont;
 static GLTcache gltGlobalCache = {0};
+static GLboolean gltHasChangedTransform;
 
 static GLuint
 gltCreateShader(GLenum type, const char *source)
@@ -123,8 +124,9 @@ gltUseProgram(void)
 GLT_API void
 gltSetTransform(float *matrix, GLboolean transpose)
 {
-	gltUseProgram();
+	gltHasChangedTransform = 1;
 
+	gltUseProgram();
 	GLuint transformLocation = glGetUniformLocation(gltProgram, "transform");
 	glUniformMatrix4fv(transformLocation, 1, transpose, matrix);
 }
@@ -149,6 +151,17 @@ gltOrtho(float left, float right, float bottom, float top, float zNear, float zF
 GLT_API void
 gltDraw(GLTbuffer b)
 {
+	if (!gltHasChangedTransform) {
+		GLint viewport[4];
+		glGetIntegerv(GL_VIEWPORT, viewport);
+
+		float left = viewport[0];
+		float right = left + viewport[2];
+		float bottom = viewport[1];
+		float top = bottom + viewport[3];
+		gltOrtho(left, right, bottom, top, -1, 1);
+	}
+
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b.vertices);
 	glEnableVertexAttribArray(1);
