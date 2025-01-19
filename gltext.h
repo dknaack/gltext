@@ -152,6 +152,9 @@ gltDraw(GLTbuffer b)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b.vertices + 2);
 	glDrawElements(GL_TRIANGLES, b.indexCount, GL_UNSIGNED_INT, b.indices);
+
+	b.vertexCount = 0;
+	b.indexCount = 0;
 }
 
 GLT_API void
