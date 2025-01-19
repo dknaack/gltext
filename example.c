@@ -279,16 +279,16 @@ int main(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glGenTextures(1, &cache.textureAtlas);
-	glBindTexture(GL_TEXTURE_2D, cache.textureAtlas);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0,
-		GL_RED, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	if (!cache.textureAtlas) {
+		glGenTextures(1, &cache.textureAtlas);
+		glBindTexture(GL_TEXTURE_2D, cache.textureAtlas);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0,
+			GL_RED, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
 
 	for (int c = 32; c < 127; c++) {
 		if (glyphs[c].codepoint != 0) {
