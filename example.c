@@ -116,6 +116,15 @@ gltUseProgram(void)
 }
 
 static void
+gltSetTransform(float *matrix, GLboolean transpose)
+{
+	gltUseProgram();
+
+	GLuint transformLocation = glGetUniformLocation(gltProgram, "transform");
+	glUniformMatrix4fv(transformLocation, 1, transpose, matrix);
+}
+
+static void
 gltOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	float matrix[4][4] = {0};
@@ -129,9 +138,7 @@ gltOrtho(float left, float right, float bottom, float top, float zNear, float zF
 	matrix[1][3] = - (top + bottom) / (top - bottom);
 	matrix[2][3] = - (zFar + zNear) / (zFar - zNear);
 
-	gltUseProgram();
-	GLuint transformLocation = glGetUniformLocation(gltProgram, "transform");
-	glUniformMatrix4fv(transformLocation, 1, GL_TRUE, &matrix[0][0]);
+	gltSetTransform(matrix[0], GL_TRUE);
 }
 
 static void
