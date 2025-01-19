@@ -62,6 +62,7 @@ int main(void)
 
 		float x = floor(0.5f * (w - textWidth));
 		float y = floor(0.5f * (h - fontHeight));
+		gltSetColorRGBA(1, 1, 1, 1);
 		gltBindFont(font);
 		gltPushText(&buffer, x, y, text);
 		gltDrawBuffer(&buffer);

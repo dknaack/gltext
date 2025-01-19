@@ -115,11 +115,13 @@ gltUseProgram(void)
 
 		static const char *fragmentSource = "#version 330 core\n"
 			"in vec2 vTexCoords;\n"
+			"uniform vec4 color;\n"
 			"uniform sampler2D textureAtlas;"
 			"out vec4 fragColor;\n"
 			"void main()\n"
 			"{"
-			"    fragColor = vec4(1., 1., 1., texture(textureAtlas, vTexCoords).r);\n"
+			"    float alpha = texture(textureAtlas, vTexCoords).r;"
+			"    fragColor = mix(vec4(0), color, alpha);\n"
 			"}\n";
 
 		GLuint vertexShader = gltCreateShader(GL_VERTEX_SHADER, vertexSource);
@@ -140,6 +142,10 @@ gltUseProgram(void)
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
+		glUseProgram(gltProgram);
+		GLuint colorLocation = glGetUniformLocation(gltProgram, "color");
+		glUniform4f(colorLocation, 0, 0, 0, 1);
 	}
 
 	glEnable(GL_BLEND);
@@ -155,6 +161,14 @@ gltSetTransform(float *matrix, GLboolean transpose)
 	gltUseProgram();
 	GLuint transformLocation = glGetUniformLocation(gltProgram, "transform");
 	glUniformMatrix4fv(transformLocation, 1, transpose, matrix);
+}
+
+GLT_API void
+gltSetColorRGBA(float r, float g, float b, float a)
+{
+	gltUseProgram();
+	GLuint colorLocation = glGetUniformLocation(gltProgram, "color");
+	glUniform4f(colorLocation, r, g, b, a);
 }
 
 GLT_API void
