@@ -32,10 +32,10 @@ typedef struct {
 	GLsizei indexCount;
 } GLTbuffer;
 
-GLT_API void gltPushText(GLTbuffer *b, char *text);
-GLT_API void gltPushnText(GLTbuffer *b, char *text, GLsizei count);
-GLT_API void gltDrawText(char *text);
-GLT_API void gltDrawnText(char *text, GLsizei count);
+GLT_API void gltPushText(GLTbuffer *b, float x, float y, char *text);
+GLT_API void gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count);
+GLT_API void gltDrawText(float x, float y, char *text);
+GLT_API void gltDrawnText(float x, float y, char *text, GLsizei count);
 GLT_API void gltDraw(GLTbuffer b);
 
 GLT_API GLuint gltCreateFont(char *filename, int pixelSize);
@@ -173,7 +173,7 @@ gltDraw(GLTbuffer b)
 }
 
 GLT_API void
-gltPushnText(GLTbuffer *b, char *text, GLsizei count)
+gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count)
 {
 	if (gltCurrentFont == 0) {
 		return;
@@ -233,8 +233,6 @@ gltPushnText(GLTbuffer *b, char *text, GLsizei count)
 		}
 	}
 
-	float x = 0;
-	float y = 0;
 	char *at = text;
 	while (count-- > 0) {
 		int c = *at++;
@@ -315,17 +313,17 @@ gltTextLength(char *text)
 }
 
 GLT_API void
-gltPushText(GLTbuffer *b, char *text)
+gltPushText(GLTbuffer *b, float x, float y, char *text)
 {
 	GLsizei length = gltTextLength(text);
-	gltPushnText(b, text, length);
+	gltPushnText(b, x, y, text, length);
 }
 
 GLT_API void
-gltDrawnText(char *text, GLsizei count)
+gltDrawnText(float x, float y, char *text, GLsizei count)
 {
 	GLTbuffer b = {0};
-	gltPushnText(&b, text, count);
+	gltPushnText(&b, x, y, text, count);
 	gltDraw(b);
 
 	free(b.vertices);
@@ -333,10 +331,10 @@ gltDrawnText(char *text, GLsizei count)
 }
 
 GLT_API void
-gltDrawText(char *text)
+gltDrawText(float x, float y, char *text)
 {
 	GLsizei length = gltTextLength(text);
-	gltDrawnText(text, length);
+	gltDrawnText(x, y, text, length);
 }
 
 GLT_API GLuint

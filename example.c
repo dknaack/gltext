@@ -76,7 +76,7 @@ int main(void)
 
 		GLTbuffer buffer = {0};
 		gltBindFont(font);
-		gltPushText(&buffer, text);
+		gltPushText(&buffer, 0, 0, text);
 		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
