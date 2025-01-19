@@ -88,7 +88,7 @@ GLT_API void
 gltUseProgram(void)
 {
 	if (!gltProgram) {
-		static const char *vertexSource = "#version 430 core\n"
+		static const char *vertexSource = "#version 330 core\n"
 			"layout (location = 0) in vec2 aPos;\n"
 			"layout (location = 1) in vec2 aTexCoords;\n"
 			"uniform mat4 transform;\n"
@@ -99,7 +99,7 @@ gltUseProgram(void)
 			"    gl_Position = transform * vec4(aPos, 0.0, 1.0);\n"
 			"}\n";
 
-		static const char *fragmentSource = "#version 430 core\n"
+		static const char *fragmentSource = "#version 330 core\n"
 			"in vec2 vTexCoords;\n"
 			"uniform sampler2D textureAtlas;"
 			"out vec4 fragColor;\n"
