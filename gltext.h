@@ -288,6 +288,16 @@ gltPushText(GLTbuffer *b, char *text)
 	}
 }
 
+GLT_API void
+gltDrawText(char *text)
+{
+	GLTbuffer b = {0};
+	gltPushText(&b, text);
+	gltDraw(b);
+	free(b.vertices);
+	free(b.indices);
+}
+
 GLT_API GLuint
 gltCreateFont(char *filename, int pixelSize)
 {
