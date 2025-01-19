@@ -56,6 +56,18 @@ in 2d. You can use `gltOrtho` to create such a matrix. If the transform was not
 set before drawing text, then the library will create an orthographic projection
 matrix from the viewport parameters.
 
+```c
+gltOrtho(0, viewportWidth, 0, viewportHeight, -1, 1);
+
+/* for column-major matrices */
+float transform[4][4] = ...;
+gltSetTransform(transform, GL_FALSE);
+
+/* for row-major matrices */
+float transform[4][4] = ...;
+gltSetTransform(transform, GL_TRUE);
+```
+
 ### Removing Inclusion of the Standard Library
 
 By default, the library uses `realloc` for dynamically allocating the vertex and
