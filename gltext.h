@@ -265,70 +265,72 @@ gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count)
 	char *at = text;
 	while (count-- > 0) {
 		int c = *at++;
-		if (c < 128) {
-			if (b->vertexCount + 4 > b->maxVertexCount) {
-				if (b->maxVertexCount == 0) {
-					b->maxVertexCount = 1024;
-				} else {
-					b->maxVertexCount *= 2;
-				}
-
-				GLsizei size = b->maxVertexCount * 4 * sizeof(*b->vertices);
-				b->vertices = (GLfloat *)GLT_REALLOC(b->vertices, size);
-			}
-
-			if (b->indexCount + 6 > b->maxIndexCount) {
-				if (b->maxIndexCount == 0) {
-					b->maxIndexCount = 1024;
-				} else {
-					b->maxIndexCount *= 2;
-				}
-
-				GLsizei size = b->maxIndexCount * sizeof(*b->indices);
-				b->indices = (GLuint *)GLT_REALLOC(b->indices, size);
-			}
-
-			GLTglyph *glyph = &cache->glyphs[c];
-			float width = glyph->xMax - glyph->xMin;
-			float height = glyph->yMax - glyph->yMin;
-
-			float *vertex = b->vertices + 4 * b->vertexCount;
-			unsigned int *index = b->indices + b->indexCount;
-			float xPos = x + glyph->bearingX;
-			float yPos = y + glyph->bearingY;
-
-			*vertex++ = xPos;
-			*vertex++ = yPos;
-			*vertex++ = glyph->xMin / 1024.;
-			*vertex++ = glyph->yMax / 1024.;
-
-			*vertex++ = xPos + width;
-			*vertex++ = yPos;
-			*vertex++ = glyph->xMax / 1024.;
-			*vertex++ = glyph->yMax / 1024.;
-
-			*vertex++ = xPos;
-			*vertex++ = yPos + height;
-			*vertex++ = glyph->xMin / 1024.;
-			*vertex++ = glyph->yMin / 1024.;
-
-			*vertex++ = xPos + width;
-			*vertex++ = yPos + height;
-			*vertex++ = glyph->xMax / 1024.;
-			*vertex++ = glyph->yMin / 1024.;
-
-			*index++ = b->vertexCount + 0;
-			*index++ = b->vertexCount + 1;
-			*index++ = b->vertexCount + 3;
-
-			*index++ = b->vertexCount + 0;
-			*index++ = b->vertexCount + 3;
-			*index++ = b->vertexCount + 2;
-
-			x += glyph->advance;
-			b->vertexCount += 4;
-			b->indexCount += 6;
+		if (c >= 128) {
+			continue;
 		}
+
+		if (b->vertexCount + 4 > b->maxVertexCount) {
+			if (b->maxVertexCount == 0) {
+				b->maxVertexCount = 1024;
+			} else {
+				b->maxVertexCount *= 2;
+			}
+
+			GLsizei size = b->maxVertexCount * 4 * sizeof(*b->vertices);
+			b->vertices = (GLfloat *)GLT_REALLOC(b->vertices, size);
+		}
+
+		if (b->indexCount + 6 > b->maxIndexCount) {
+			if (b->maxIndexCount == 0) {
+				b->maxIndexCount = 1024;
+			} else {
+				b->maxIndexCount *= 2;
+			}
+
+			GLsizei size = b->maxIndexCount * sizeof(*b->indices);
+			b->indices = (GLuint *)GLT_REALLOC(b->indices, size);
+		}
+
+		GLTglyph *glyph = &cache->glyphs[c];
+		float width = glyph->xMax - glyph->xMin;
+		float height = glyph->yMax - glyph->yMin;
+
+		float *vertex = b->vertices + 4 * b->vertexCount;
+		unsigned int *index = b->indices + b->indexCount;
+		float xPos = x + glyph->bearingX;
+		float yPos = y + glyph->bearingY;
+
+		*vertex++ = xPos;
+		*vertex++ = yPos;
+		*vertex++ = glyph->xMin / 1024.;
+		*vertex++ = glyph->yMax / 1024.;
+
+		*vertex++ = xPos + width;
+		*vertex++ = yPos;
+		*vertex++ = glyph->xMax / 1024.;
+		*vertex++ = glyph->yMax / 1024.;
+
+		*vertex++ = xPos;
+		*vertex++ = yPos + height;
+		*vertex++ = glyph->xMin / 1024.;
+		*vertex++ = glyph->yMin / 1024.;
+
+		*vertex++ = xPos + width;
+		*vertex++ = yPos + height;
+		*vertex++ = glyph->xMax / 1024.;
+		*vertex++ = glyph->yMin / 1024.;
+
+		*index++ = b->vertexCount + 0;
+		*index++ = b->vertexCount + 1;
+		*index++ = b->vertexCount + 3;
+
+		*index++ = b->vertexCount + 0;
+		*index++ = b->vertexCount + 3;
+		*index++ = b->vertexCount + 2;
+
+		x += glyph->advance;
+		b->vertexCount += 4;
+		b->indexCount += 6;
 	}
 }
 
