@@ -56,9 +56,6 @@ int main(void)
 
 	GLuint font = gltCreateFont("OpenSans.ttf", 16);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	while (!glfwWindowShouldClose(window)) {
 		int w, h;
 		glfwGetFramebufferSize(window, &w, &h);
