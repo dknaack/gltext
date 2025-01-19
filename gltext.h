@@ -1,6 +1,8 @@
 #ifndef GLTEXT_H
 #define GLTEXT_H
 
+/* This is free and unencumbered software released into the public domain. */
+
 #ifndef GLT_API
 #define GLT_API extern
 #endif /* GLT_API */
