@@ -255,24 +255,26 @@ gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count)
 	while (count-- > 0) {
 		int c = *at++;
 		if (c < 128) {
-			if (b->vertexCount >= b->maxVertexCount) {
+			if (b->vertexCount + 4 > b->maxVertexCount) {
 				if (b->maxVertexCount == 0) {
 					b->maxVertexCount = 1024;
 				} else {
 					b->maxVertexCount *= 2;
 				}
 
-				b->vertices = (GLfloat *)GLT_REALLOC(b->vertices, b->maxVertexCount * sizeof(*b->vertices));
+				GLsizei size = b->maxVertexCount * 4 * sizeof(*b->vertices);
+				b->vertices = (GLfloat *)GLT_REALLOC(b->vertices, size);
 			}
 
-			if (b->indexCount >= b->maxIndexCount) {
+			if (b->indexCount + 6 > b->maxIndexCount) {
 				if (b->maxIndexCount == 0) {
 					b->maxIndexCount = 1024;
 				} else {
 					b->maxIndexCount *= 2;
 				}
 
-				b->indices = (GLuint *)GLT_REALLOC(b->indices, b->maxIndexCount * sizeof(*b->indices));
+				GLsizei size = b->maxIndexCount * sizeof(*b->indices);
+				b->indices = (GLuint *)GLT_REALLOC(b->indices, size);
 			}
 
 			GLTglyph *glyph = &cache->glyphs[c];
