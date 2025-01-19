@@ -11,7 +11,7 @@ the usage below.
 ## Usage
 
 As this is a single-header library, you must define `GLT_IMPL` in at least one
-source file.
+source file and link with FreeType.
 
 ```c
 #define GLT_IMPL
