@@ -2,6 +2,7 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <math.h>
 
 #define GLAD_GL_IMPLEMENTATION
 #define GLT_IMPL
@@ -54,7 +55,8 @@ int main(void)
 	 * Initialize the text API
 	 */
 
-	GLuint font = gltCreateFont("OpenSans.ttf", 16);
+	float fontHeight = 48;
+	GLuint font = gltCreateFont("OpenSans.ttf", fontHeight);
 
 	while (!glfwWindowShouldClose(window)) {
 		int w, h;
@@ -64,11 +66,15 @@ int main(void)
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		char text[] = "Hello, world! This is a test.";
+		char text[] = "Hello, world!";
+		float textWidth = gltMeasureTextWidth(text);
+		printf("%f\n", textWidth);
 
+		float x = floor(0.5f * (w - textWidth));
+		float y = floor(0.5f * (h - fontHeight));
 		GLTbuffer buffer = {0};
 		gltBindFont(font);
-		gltPushText(&buffer, 0, 0, text);
+		gltPushText(&buffer, x, y, text);
 		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
