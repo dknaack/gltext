@@ -1,10 +1,10 @@
 # Single-Header OpenGL Text Rendering Library
 
 This is a single-header library for rendering text in OpenGL. It depends on
-FreeType and optionally the C standard library. You can remove the standard
-library by redefining `GLT_REALLOC` to your own realloc function. See
-`example.c` for an example on how to use this library or look at the usage
-below.
+[FreeType](https://freetype.org/) and optionally the C standard library. You can
+remove the standard library by redefining `GLT_REALLOC` to your own realloc
+function. See `example.c` for an example on how to use this library or look at
+the usage below.
 
 ![Example Screenshot](screenshot.png)
 
