@@ -49,7 +49,11 @@ GLT_API void gltUseProgram(void);
 
 #ifdef GLT_IMPL
 
+#ifndef GLT_REALLOC
 #include <stdlib.h>
+#define GLT_REALLOC(p, sz) ((sz) == 0 ? (free(p), NULL) : realloc(p, sz))
+#endif /* GLT_REALLOC */
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -248,7 +252,7 @@ gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count)
 					b->maxVertexCount *= 2;
 				}
 
-				b->vertices = (GLfloat *)realloc(b->vertices, b->maxVertexCount * sizeof(*b->vertices));
+				b->vertices = (GLfloat *)GLT_REALLOC(b->vertices, b->maxVertexCount * sizeof(*b->vertices));
 			}
 
 			if (b->indexCount >= b->maxIndexCount) {
@@ -258,7 +262,7 @@ gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count)
 					b->maxIndexCount *= 2;
 				}
 
-				b->indices = (GLuint *)realloc(b->indices, b->maxIndexCount * sizeof(*b->indices));
+				b->indices = (GLuint *)GLT_REALLOC(b->indices, b->maxIndexCount * sizeof(*b->indices));
 			}
 
 			GLTglyph *glyph = &cache->glyphs[c];
