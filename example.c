@@ -18,6 +18,16 @@ typedef struct {
 	float advance;
 } GLTglyph;
 
+typedef struct {
+	GLfloat *vertices;
+	GLsizei maxVertexCount;
+	GLsizei vertexCount;
+
+	GLuint *indices;
+	GLsizei maxIndexCount;
+	GLsizei indexCount;
+} GLTbuffer;
+
 static void errorCallback(int err, const char *desc);
 static void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods);
 
@@ -230,11 +240,7 @@ int main(void)
 		gltOrtho(0, w, 0, h, -1, 1);
 		char text[] = "Hello, world! This is a test.";
 
-		GLsizei vertexCount = 0;
-		float vertices[4 * 4 * sizeof(text)] = {0};
-
-		GLsizei indexCount = 0;
-		unsigned int indices[6 * sizeof(text)] = {0};
+		GLTbuffer buffer = {0};
 
 		float x = 0;
 		float y = 0;
@@ -243,12 +249,32 @@ int main(void)
 		while (*at) {
 			int c = *at++;
 			if (c < 128) {
+				if (buffer.vertexCount >= buffer.maxVertexCount) {
+					if (buffer.maxVertexCount == 0) {
+						buffer.maxVertexCount = 1024;
+					} else {
+						buffer.maxVertexCount *= 2;
+					}
+
+					buffer.vertices = (GLfloat *)realloc(buffer.vertices, buffer.maxVertexCount * sizeof(*buffer.vertices));
+				}
+
+				if (buffer.indexCount >= buffer.maxIndexCount) {
+					if (buffer.maxIndexCount == 0) {
+						buffer.maxIndexCount = 1024;
+					} else {
+						buffer.maxIndexCount *= 2;
+					}
+
+					buffer.indices = (GLuint *)realloc(buffer.indices, buffer.maxIndexCount * sizeof(*buffer.indices));
+				}
+
 				GLTglyph *glyph = &glyphs[c];
 				float width = glyph->xMax - glyph->xMin;
 				float height = glyph->yMax - glyph->yMin;
 
-				float *vertex = vertices + 4 * vertexCount;
-				unsigned int *index = indices + indexCount;
+				float *vertex = buffer.vertices + 4 * buffer.vertexCount;
+				unsigned int *index = buffer.indices + buffer.indexCount;
 				float xPos = x + glyph->bearingX;
 				float yPos = y + glyph->bearingY;
 
@@ -272,32 +298,31 @@ int main(void)
 				*vertex++ = glyph->xMax / 1024.;
 				*vertex++ = glyph->yMin / 1024.;
 
-				*index++ = vertexCount + 0;
-				*index++ = vertexCount + 1;
-				*index++ = vertexCount + 3;
+				*index++ = buffer.vertexCount + 0;
+				*index++ = buffer.vertexCount + 1;
+				*index++ = buffer.vertexCount + 3;
 
-				*index++ = vertexCount + 0;
-				*index++ = vertexCount + 3;
-				*index++ = vertexCount + 2;
+				*index++ = buffer.vertexCount + 0;
+				*index++ = buffer.vertexCount + 3;
+				*index++ = buffer.vertexCount + 2;
 
 				x += glyph->advance;
-				vertexCount += 4;
-				indexCount += 6;
+				buffer.vertexCount += 4;
+				buffer.indexCount += 6;
 			}
 		}
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), vertices);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), buffer.vertices);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), vertices + 2);
-		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, indices);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), buffer.vertices + 2);
+		glDrawElements(GL_TRIANGLES, buffer.indexCount, GL_UNSIGNED_INT, buffer.indices);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
-
     glfwTerminate();
     exit(EXIT_SUCCESS);
 error:
