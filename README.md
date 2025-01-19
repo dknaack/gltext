@@ -6,7 +6,9 @@ remove the standard library by redefining `GLT_REALLOC` to your own realloc
 function. See `example.c` for an example on how to use this library or look at
 the usage below.
 
-![Example Screenshot](screenshot.png)
+<p align="center">
+  <img src="screenshot.png" alt="Example Screenshot">
+</p>
 
 ## Usage
 
