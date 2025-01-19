@@ -161,8 +161,60 @@ gltDraw(GLTbuffer b)
 }
 
 static void
-gltPushText(GLTbuffer *b, char *text, GLTglyph *glyphs)
+gltPushText(GLTbuffer *b, char *text, GLTcache *cache, FT_Face face)
 {
+	if (!cache->textureAtlas) {
+		glGenTextures(1, &cache->textureAtlas);
+		glBindTexture(GL_TEXTURE_2D, cache->textureAtlas);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0,
+			GL_RED, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+
+	for (int c = 32; c < 127; c++) {
+		if (cache->glyphs[c].codepoint != 0) {
+			continue;
+		}
+
+		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0) {
+			continue;
+		}
+
+		FT_GlyphSlot glyphSlot = face->glyph;
+		FT_Bitmap bitmap = glyphSlot->bitmap;
+
+		if (cache->currentOffsetX + bitmap.width > 1024) {
+			cache->currentOffsetX = 0;
+			cache->currentOffsetY += cache->currentRowHeight;
+			cache->currentRowHeight = 0;
+		}
+
+		float width = bitmap.width;
+		float height = bitmap.rows;
+
+		GLTglyph *glyph = cache->glyphs + c;
+		glyph->codepoint = c;
+		glyph->xMin = cache->currentOffsetX;
+		glyph->yMin = cache->currentOffsetY;
+		glyph->xMax = glyph->xMin + width;
+		glyph->yMax = glyph->yMin + height;
+		glyph->advance = glyphSlot->advance.x / 64.;
+		glyph->bearingX = glyphSlot->bitmap_left;
+		glyph->bearingY = glyphSlot->bitmap_top - height;
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, cache->currentOffsetX, cache->currentOffsetY,
+			width, height, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+
+		cache->currentOffsetX += bitmap.width;
+		if (bitmap.rows > cache->currentRowHeight) {
+			cache->currentRowHeight = bitmap.rows;
+		}
+	}
+
 	float x = 0;
 	float y = 0;
 	char *at = text;
@@ -189,7 +241,7 @@ gltPushText(GLTbuffer *b, char *text, GLTglyph *glyphs)
 				b->indices = (GLuint *)realloc(b->indices, b->maxIndexCount * sizeof(*b->indices));
 			}
 
-			GLTglyph *glyph = &glyphs[c];
+			GLTglyph *glyph = &cache->glyphs[c];
 			float width = glyph->xMax - glyph->xMin;
 			float height = glyph->yMax - glyph->yMin;
 
@@ -279,57 +331,6 @@ int main(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	if (!cache.textureAtlas) {
-		glGenTextures(1, &cache.textureAtlas);
-		glBindTexture(GL_TEXTURE_2D, cache.textureAtlas);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0,
-			GL_RED, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	}
-
-	for (int c = 32; c < 127; c++) {
-		if (glyphs[c].codepoint != 0) {
-			continue;
-		}
-
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0) {
-			continue;
-		}
-
-		FT_GlyphSlot glyphSlot = face->glyph;
-		FT_Bitmap bitmap = glyphSlot->bitmap;
-
-		if (cache.currentOffsetX + bitmap.width > 1024) {
-			cache.currentOffsetX = 0;
-			cache.currentOffsetY += cache.currentRowHeight;
-			cache.currentRowHeight = 0;
-		}
-
-		float width = bitmap.width;
-		float height = bitmap.rows;
-
-		GLTglyph *glyph = cache.glyphs + c;
-		glyph->codepoint = c;
-		glyph->xMin = cache.currentOffsetX;
-		glyph->yMin = cache.currentOffsetY;
-		glyph->xMax = glyph->xMin + width;
-		glyph->yMax = glyph->yMin + height;
-		glyph->advance = glyphSlot->advance.x / 64.;
-		glyph->bearingX = glyphSlot->bitmap_left;
-		glyph->bearingY = glyphSlot->bitmap_top - height;
-
-		glTexSubImage2D(GL_TEXTURE_2D, 0, cache.currentOffsetX, cache.currentOffsetY,
-			width, height, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
-
-		cache.currentOffsetX += bitmap.width;
-		if (bitmap.rows > cache.currentRowHeight) {
-			cache.currentRowHeight = bitmap.rows;
-		}
-	}
-
 	while (!glfwWindowShouldClose(window)) {
 		int w, h;
 		glfwGetFramebufferSize(window, &w, &h);
@@ -343,7 +344,7 @@ int main(void)
 		char text[] = "Hello, world! This is a test.";
 
 		GLTbuffer buffer = {0};
-		gltPushText(&buffer, text, cache.glyphs);
+		gltPushText(&buffer, text, &cache, face);
 		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
