@@ -175,6 +175,9 @@ gltDraw(GLTbuffer b)
 		float bottom = viewport[1];
 		float top = bottom + viewport[3];
 		gltOrtho(left, right, bottom, top, -1, 1);
+
+		/* To keep changing it every frame until the user sets it */
+		gltHasChangedTransform = 0;
 	}
 
 	glEnableVertexAttribArray(0);
