@@ -49,8 +49,6 @@ gltCreateShader(GLenum type, const char *source)
 	return shader;
 }
 
-static GLuint gltProgram;
-
 static void
 gltUseProgram(void)
 {
