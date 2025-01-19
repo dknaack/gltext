@@ -59,6 +59,7 @@ static GLuint gltProgram;
 static FT_Face gltFonts[256];
 static GLuint gltFontCount = 1;
 static GLuint gltCurrentFont;
+static GLTcache gltGlobalCache = {0};
 
 static GLuint
 gltCreateShader(GLenum type, const char *source)
@@ -164,12 +165,13 @@ gltDraw(GLTbuffer b)
 }
 
 static void
-gltPushText(GLTbuffer *b, char *text, GLTcache *cache)
+gltPushText(GLTbuffer *b, char *text)
 {
 	if (gltCurrentFont == 0) {
 		return;
 	}
 
+	GLTcache *cache = &gltGlobalCache;
 	if (!cache->textureAtlas) {
 		glGenTextures(1, &cache->textureAtlas);
 		glBindTexture(GL_TEXTURE_2D, cache->textureAtlas);
@@ -352,7 +354,6 @@ int main(void)
 	 * Initialize the text API
 	 */
 
-	GLTcache cache = {0};
 	GLuint font = gltCreateFont("/usr/share/fonts/TTF/Arial.TTF", 16);
 
 	glEnable(GL_BLEND);
@@ -372,7 +373,7 @@ int main(void)
 
 		GLTbuffer buffer = {0};
 		gltBindFont(font);
-		gltPushText(&buffer, text, &cache);
+		gltPushText(&buffer, text);
 		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
