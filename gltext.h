@@ -38,7 +38,7 @@ GLT_API void gltPushText(GLTbuffer *b, float x, float y, char *text);
 GLT_API void gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count);
 GLT_API void gltDrawText(float x, float y, char *text);
 GLT_API void gltDrawnText(float x, float y, char *text, GLsizei count);
-GLT_API void gltDraw(GLTbuffer b);
+GLT_API void gltDrawBuffer(GLTbuffer b);
 
 GLT_API float gltMeasureTextWidth(char *text);
 GLT_API float gltMeasurenTextWidth(char *text, GLsizei count);
@@ -164,7 +164,7 @@ gltOrtho(float left, float right, float bottom, float top, float zNear, float zF
 }
 
 GLT_API void
-gltDraw(GLTbuffer b)
+gltDrawBuffer(GLTbuffer b)
 {
 	if (!gltHasChangedTransform) {
 		GLint viewport[4];
@@ -342,7 +342,7 @@ gltDrawnText(float x, float y, char *text, GLsizei count)
 {
 	GLTbuffer b = {0};
 	gltPushnText(&b, x, y, text, count);
-	gltDraw(b);
+	gltDrawBuffer(b);
 
 	free(b.vertices);
 	free(b.indices);

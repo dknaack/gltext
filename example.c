@@ -68,7 +68,7 @@ int main(void)
 		float y = floor(0.5f * (h - fontHeight));
 		gltBindFont(font);
 		gltPushText(&buffer, x, y, text);
-		gltDraw(buffer);
+		gltDrawBuffer(buffer);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
