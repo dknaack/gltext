@@ -40,6 +40,9 @@ GLT_API void gltDrawText(float x, float y, char *text);
 GLT_API void gltDrawnText(float x, float y, char *text, GLsizei count);
 GLT_API void gltDraw(GLTbuffer b);
 
+GLT_API float gltMeasureTextWidth(char *text);
+GLT_API float gltMeasurenTextWidth(char *text, GLsizei count);
+
 GLT_API GLuint gltCreateFont(char *filename, int pixelSize);
 GLT_API void gltBindFont(GLuint font);
 
@@ -345,6 +348,31 @@ gltDrawText(float x, float y, char *text)
 {
 	GLsizei length = gltTextLength(text);
 	gltDrawnText(x, y, text, length);
+}
+
+GLT_API float
+gltMeasurenTextWidth(char *text, GLsizei count)
+{
+	float width = 0;
+
+	FT_Face face = gltFonts[gltCurrentFont];
+	char *at = text;
+	while (count-- > 0) {
+		char c = *at++;
+		if (FT_Load_Char(face, c, FT_LOAD_DEFAULT) == 0) {
+			width += face->glyph->advance.x / 64.;
+		}
+	}
+
+	return width;
+}
+
+GLT_API float
+gltMeasureTextWidth(char *text)
+{
+	GLsizei length = gltTextLength(text);
+	float width = gltMeasurenTextWidth(text, length);
+	return width;
 }
 
 GLT_API GLuint
