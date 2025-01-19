@@ -46,7 +46,7 @@ GLT_API void gltPushText(GLTbuffer *b, float x, float y, char *text);
 GLT_API void gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count);
 GLT_API void gltDrawText(float x, float y, char *text);
 GLT_API void gltDrawnText(float x, float y, char *text, GLsizei count);
-GLT_API void gltDrawBuffer(GLTbuffer b);
+GLT_API void gltDrawBuffer(GLTbuffer *b);
 
 /*
  * Measures the width of the text using the currently bound font.
@@ -175,7 +175,7 @@ gltOrtho(float left, float right, float bottom, float top, float zNear, float zF
 }
 
 GLT_API void
-gltDrawBuffer(GLTbuffer b)
+gltDrawBuffer(GLTbuffer *b)
 {
 	if (!gltHasChangedTransform) {
 		GLint viewport[4];
@@ -192,13 +192,13 @@ gltDrawBuffer(GLTbuffer b)
 	}
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b.vertices);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b->vertices);
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b.vertices + 2);
-	glDrawElements(GL_TRIANGLES, b.indexCount, GL_UNSIGNED_INT, b.indices);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b->vertices + 2);
+	glDrawElements(GL_TRIANGLES, b->indexCount, GL_UNSIGNED_INT, b->indices);
 
-	b.vertexCount = 0;
-	b.indexCount = 0;
+	b->vertexCount = 0;
+	b->indexCount = 0;
 }
 
 GLT_API void
@@ -357,7 +357,7 @@ gltDrawnText(float x, float y, char *text, GLsizei count)
 {
 	GLTbuffer b = {0};
 	gltPushnText(&b, x, y, text, count);
-	gltDrawBuffer(b);
+	gltDrawBuffer(&b);
 
 	free(b.vertices);
 	free(b.indices);
