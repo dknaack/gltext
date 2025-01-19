@@ -8,6 +8,7 @@
 #include FT_FREETYPE_H
 
 #define GLAD_GL_IMPLEMENTATION
+#define GLT_IMPL
 #include "glad.h"
 #include "gltext.h"
 

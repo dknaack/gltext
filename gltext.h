@@ -1,3 +1,10 @@
+#ifndef GLTEXT_H
+#define GLTEXT_H
+
+#ifndef GLT_API
+#define GLT_API extern
+#endif /* GLT_API */
+
 typedef struct {
 	GLuint codepoint;
 	float xMin, xMax;
@@ -25,6 +32,21 @@ typedef struct {
 	GLsizei indexCount;
 } GLTbuffer;
 
+GLT_API void gltPushText(GLTbuffer *b, char *text);
+GLT_API void gltDrawText(char *text);
+GLT_API void gltDraw(GLTbuffer b);
+
+GLT_API GLuint gltCreateFont(char *filename, int pixelSize);
+GLT_API void gltBindFont(GLuint font);
+
+GLT_API void gltOrtho(float left, float right, float bottom, float top, float zNear, float zFar);
+GLT_API void gltSetTransform(float *matrix, GLboolean transpose);
+GLT_API void gltUseProgram(void);
+
+#endif /* GLTEXT_H */
+
+#ifdef GLT_IMPL
+
 static GLuint gltProgram;
 static FT_Face gltFonts[256];
 static GLuint gltFontCount = 1;
@@ -49,7 +71,7 @@ gltCreateShader(GLenum type, const char *source)
 	return shader;
 }
 
-static void
+GLT_API void
 gltUseProgram(void)
 {
 	if (!gltProgram) {
@@ -96,7 +118,7 @@ gltUseProgram(void)
 	glUseProgram(gltProgram);
 }
 
-static void
+GLT_API void
 gltSetTransform(float *matrix, GLboolean transpose)
 {
 	gltUseProgram();
@@ -105,7 +127,7 @@ gltSetTransform(float *matrix, GLboolean transpose)
 	glUniformMatrix4fv(transformLocation, 1, transpose, matrix);
 }
 
-static void
+GLT_API void
 gltOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
 {
 	float matrix[4][4] = {0};
@@ -122,7 +144,7 @@ gltOrtho(float left, float right, float bottom, float top, float zNear, float zF
 	gltSetTransform(matrix[0], GL_TRUE);
 }
 
-static void
+GLT_API void
 gltDraw(GLTbuffer b)
 {
 	glEnableVertexAttribArray(0);
@@ -132,7 +154,7 @@ gltDraw(GLTbuffer b)
 	glDrawElements(GL_TRIANGLES, b.indexCount, GL_UNSIGNED_INT, b.indices);
 }
 
-static void
+GLT_API void
 gltPushText(GLTbuffer *b, char *text)
 {
 	if (gltCurrentFont == 0) {
@@ -263,7 +285,7 @@ gltPushText(GLTbuffer *b, char *text)
 	}
 }
 
-static GLuint
+GLT_API GLuint
 gltCreateFont(char *filename, int pixelSize)
 {
 	static FT_Library ft;
@@ -288,8 +310,10 @@ gltCreateFont(char *filename, int pixelSize)
 	return id;
 }
 
-static void
+GLT_API void
 gltBindFont(GLuint font)
 {
 	gltCurrentFont = font;
 }
+
+#endif /* GLT_IMPL */
