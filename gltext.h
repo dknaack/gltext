@@ -33,7 +33,9 @@ typedef struct {
 } GLTbuffer;
 
 GLT_API void gltPushText(GLTbuffer *b, char *text);
+GLT_API void gltPushnText(GLTbuffer *b, char *text, GLsizei count);
 GLT_API void gltDrawText(char *text);
+GLT_API void gltDrawnText(char *text, GLsizei count);
 GLT_API void gltDraw(GLTbuffer b);
 
 GLT_API GLuint gltCreateFont(char *filename, int pixelSize);
@@ -158,7 +160,7 @@ gltDraw(GLTbuffer b)
 }
 
 GLT_API void
-gltPushText(GLTbuffer *b, char *text)
+gltPushnText(GLTbuffer *b, char *text, GLsizei count)
 {
 	if (gltCurrentFont == 0) {
 		return;
@@ -221,7 +223,7 @@ gltPushText(GLTbuffer *b, char *text)
 	float x = 0;
 	float y = 0;
 	char *at = text;
-	while (*at) {
+	while (count-- > 0) {
 		int c = *at++;
 		if (c < 128) {
 			if (b->vertexCount >= b->maxVertexCount) {
@@ -288,14 +290,40 @@ gltPushText(GLTbuffer *b, char *text)
 	}
 }
 
+static GLsizei
+gltTextLength(char *text)
+{
+	GLsizei length = 0;
+	while (text[length] != 0) {
+		length++;
+	}
+
+	return length;
+}
+
+GLT_API void
+gltPushText(GLTbuffer *b, char *text)
+{
+	GLsizei length = gltTextLength(text);
+	gltPushnText(b, text, length);
+}
+
+GLT_API void
+gltDrawnText(char *text, GLsizei count)
+{
+	GLTbuffer b = {0};
+	gltPushnText(&b, text, count);
+	gltDraw(b);
+
+	free(b.vertices);
+	free(b.indices);
+}
+
 GLT_API void
 gltDrawText(char *text)
 {
-	GLTbuffer b = {0};
-	gltPushText(&b, text);
-	gltDraw(b);
-	free(b.vertices);
-	free(b.indices);
+	GLsizei length = gltTextLength(text);
+	gltDrawnText(text, length);
 }
 
 GLT_API GLuint
