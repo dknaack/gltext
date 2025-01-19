@@ -34,12 +34,23 @@ typedef struct {
 	GLsizei indexCount;
 } GLTbuffer;
 
+/*
+ * Either use gltPushText and gltDraw or gltDrawText. gltDrawText just calls
+ * gltPushText and gltDraw with a new buffer on every call. Hence, for batching
+ * use gltPushText and then call gltDraw at the end of the frame.
+ *
+ * gltDraw resets the state of the buffer, i.e. setting vertexCount and
+ * indexCount back to zero.
+ */
 GLT_API void gltPushText(GLTbuffer *b, float x, float y, char *text);
 GLT_API void gltPushnText(GLTbuffer *b, float x, float y, char *text, GLsizei count);
 GLT_API void gltDrawText(float x, float y, char *text);
 GLT_API void gltDrawnText(float x, float y, char *text, GLsizei count);
 GLT_API void gltDrawBuffer(GLTbuffer b);
 
+/*
+ * Measures the width of the text using the currently bound font.
+ */
 GLT_API float gltMeasureTextWidth(char *text);
 GLT_API float gltMeasurenTextWidth(char *text, GLsizei count);
 
