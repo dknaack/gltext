@@ -19,6 +19,14 @@ typedef struct {
 } GLTglyph;
 
 typedef struct {
+	float currentOffsetX;
+	float currentOffsetY;
+	float currentRowHeight;
+	GLuint textureAtlas;
+	GLTglyph glyphs[256];
+} GLTcache;
+
+typedef struct {
 	GLfloat *vertices;
 	GLsizei maxVertexCount;
 	GLsizei vertexCount;
@@ -253,9 +261,6 @@ int main(void)
 	 * Initialize the text API
 	 */
 
-	GLuint textureAtlas = 0;
-	GLTglyph glyphs[256] = {0};
-
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft)) {
 		fprintf(stderr, "Failed to initialize FreeType\n");
@@ -266,23 +271,21 @@ int main(void)
 		fprintf(stderr, "Failed to load font\n");
 	}
 
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(face, 0, 16);
+
+	GLTcache cache = {0};
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glGenTextures(1, &textureAtlas);
-	glBindTexture(GL_TEXTURE_2D, textureAtlas);
+	glGenTextures(1, &cache.textureAtlas);
+	glBindTexture(GL_TEXTURE_2D, cache.textureAtlas);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0,
 		GL_RED, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	float currentOffsetX = 0;
-	float currentOffsetY = 0;
-	float currentRowHeight = 0;
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -294,30 +297,30 @@ int main(void)
 		FT_GlyphSlot glyphSlot = face->glyph;
 		FT_Bitmap bitmap = glyphSlot->bitmap;
 
-		if (currentOffsetX + bitmap.width > 1024) {
-			currentOffsetX = 0;
-			currentOffsetY += currentRowHeight;
-			currentRowHeight = 0;
+		if (cache.currentOffsetX + bitmap.width > 1024) {
+			cache.currentOffsetX = 0;
+			cache.currentOffsetY += cache.currentRowHeight;
+			cache.currentRowHeight = 0;
 		}
 
 		float width = bitmap.width;
 		float height = bitmap.rows;
 
-		GLTglyph *glyph = glyphs + c;
-		glyph->xMin = currentOffsetX;
-		glyph->yMin = currentOffsetY;
+		GLTglyph *glyph = cache.glyphs + c;
+		glyph->xMin = cache.currentOffsetX;
+		glyph->yMin = cache.currentOffsetY;
 		glyph->xMax = glyph->xMin + width;
 		glyph->yMax = glyph->yMin + height;
 		glyph->advance = glyphSlot->advance.x / 64.;
 		glyph->bearingX = glyphSlot->bitmap_left;
 		glyph->bearingY = glyphSlot->bitmap_top - height;
 
-		glTexSubImage2D(GL_TEXTURE_2D, 0, currentOffsetX, currentOffsetY,
+		glTexSubImage2D(GL_TEXTURE_2D, 0, cache.currentOffsetX, cache.currentOffsetY,
 			width, height, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
 
-		currentOffsetX += bitmap.width;
-		if (bitmap.rows > currentRowHeight) {
-			currentRowHeight = bitmap.rows;
+		cache.currentOffsetX += bitmap.width;
+		if (bitmap.rows > cache.currentRowHeight) {
+			cache.currentRowHeight = bitmap.rows;
 		}
 	}
 
@@ -328,13 +331,13 @@ int main(void)
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glUseProgram(gltProgram);
+		gltUseProgram();
 
 		gltOrtho(0, w, 0, h, -1, 1);
 		char text[] = "Hello, world! This is a test.";
 
 		GLTbuffer buffer = {0};
-		gltPushText(&buffer, text, glyphs);
+		gltPushText(&buffer, text, cache.glyphs);
 		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
