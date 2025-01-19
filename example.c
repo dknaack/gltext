@@ -11,6 +11,7 @@
 #include "glad.h"
 
 typedef struct {
+	GLuint codepoint;
 	float xMin, xMax;
 	float yMin, yMax;
 	float bearingX;
@@ -290,6 +291,10 @@ int main(void)
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	for (int c = 32; c < 127; c++) {
+		if (glyphs[c].codepoint != 0) {
+			continue;
+		}
+
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0) {
 			continue;
 		}
@@ -307,6 +312,7 @@ int main(void)
 		float height = bitmap.rows;
 
 		GLTglyph *glyph = cache.glyphs + c;
+		glyph->codepoint = c;
 		glyph->xMin = cache.currentOffsetX;
 		glyph->yMin = cache.currentOffsetY;
 		glyph->xMax = glyph->xMin + width;
