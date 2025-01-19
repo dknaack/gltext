@@ -144,6 +144,80 @@ gltDraw(GLTbuffer b)
 	glDrawElements(GL_TRIANGLES, b.indexCount, GL_UNSIGNED_INT, b.indices);
 }
 
+static void
+gltPushText(GLTbuffer *b, char *text, GLTglyph *glyphs)
+{
+	float x = 0;
+	float y = 0;
+	char *at = text;
+	while (*at) {
+		int c = *at++;
+		if (c < 128) {
+			if (b->vertexCount >= b->maxVertexCount) {
+				if (b->maxVertexCount == 0) {
+					b->maxVertexCount = 1024;
+				} else {
+					b->maxVertexCount *= 2;
+				}
+
+				b->vertices = (GLfloat *)realloc(b->vertices, b->maxVertexCount * sizeof(*b->vertices));
+			}
+
+			if (b->indexCount >= b->maxIndexCount) {
+				if (b->maxIndexCount == 0) {
+					b->maxIndexCount = 1024;
+				} else {
+					b->maxIndexCount *= 2;
+				}
+
+				b->indices = (GLuint *)realloc(b->indices, b->maxIndexCount * sizeof(*b->indices));
+			}
+
+			GLTglyph *glyph = &glyphs[c];
+			float width = glyph->xMax - glyph->xMin;
+			float height = glyph->yMax - glyph->yMin;
+
+			float *vertex = b->vertices + 4 * b->vertexCount;
+			unsigned int *index = b->indices + b->indexCount;
+			float xPos = x + glyph->bearingX;
+			float yPos = y + glyph->bearingY;
+
+			*vertex++ = xPos;
+			*vertex++ = yPos;
+			*vertex++ = glyph->xMin / 1024.;
+			*vertex++ = glyph->yMax / 1024.;
+
+			*vertex++ = xPos + width;
+			*vertex++ = yPos;
+			*vertex++ = glyph->xMax / 1024.;
+			*vertex++ = glyph->yMax / 1024.;
+
+			*vertex++ = xPos;
+			*vertex++ = yPos + height;
+			*vertex++ = glyph->xMin / 1024.;
+			*vertex++ = glyph->yMin / 1024.;
+
+			*vertex++ = xPos + width;
+			*vertex++ = yPos + height;
+			*vertex++ = glyph->xMax / 1024.;
+			*vertex++ = glyph->yMin / 1024.;
+
+			*index++ = b->vertexCount + 0;
+			*index++ = b->vertexCount + 1;
+			*index++ = b->vertexCount + 3;
+
+			*index++ = b->vertexCount + 0;
+			*index++ = b->vertexCount + 3;
+			*index++ = b->vertexCount + 2;
+
+			x += glyph->advance;
+			b->vertexCount += 4;
+			b->indexCount += 6;
+		}
+	}
+
+}
+
 int main(void)
 {
     glfwSetErrorCallback(errorCallback);
@@ -253,82 +327,8 @@ int main(void)
 		char text[] = "Hello, world! This is a test.";
 
 		GLTbuffer buffer = {0};
-
-		float x = 0;
-		float y = 0;
-
-		char *at = text;
-		while (*at) {
-			int c = *at++;
-			if (c < 128) {
-				if (buffer.vertexCount >= buffer.maxVertexCount) {
-					if (buffer.maxVertexCount == 0) {
-						buffer.maxVertexCount = 1024;
-					} else {
-						buffer.maxVertexCount *= 2;
-					}
-
-					buffer.vertices = (GLfloat *)realloc(buffer.vertices, buffer.maxVertexCount * sizeof(*buffer.vertices));
-				}
-
-				if (buffer.indexCount >= buffer.maxIndexCount) {
-					if (buffer.maxIndexCount == 0) {
-						buffer.maxIndexCount = 1024;
-					} else {
-						buffer.maxIndexCount *= 2;
-					}
-
-					buffer.indices = (GLuint *)realloc(buffer.indices, buffer.maxIndexCount * sizeof(*buffer.indices));
-				}
-
-				GLTglyph *glyph = &glyphs[c];
-				float width = glyph->xMax - glyph->xMin;
-				float height = glyph->yMax - glyph->yMin;
-
-				float *vertex = buffer.vertices + 4 * buffer.vertexCount;
-				unsigned int *index = buffer.indices + buffer.indexCount;
-				float xPos = x + glyph->bearingX;
-				float yPos = y + glyph->bearingY;
-
-				*vertex++ = xPos;
-				*vertex++ = yPos;
-				*vertex++ = glyph->xMin / 1024.;
-				*vertex++ = glyph->yMax / 1024.;
-
-				*vertex++ = xPos + width;
-				*vertex++ = yPos;
-				*vertex++ = glyph->xMax / 1024.;
-				*vertex++ = glyph->yMax / 1024.;
-
-				*vertex++ = xPos;
-				*vertex++ = yPos + height;
-				*vertex++ = glyph->xMin / 1024.;
-				*vertex++ = glyph->yMin / 1024.;
-
-				*vertex++ = xPos + width;
-				*vertex++ = yPos + height;
-				*vertex++ = glyph->xMax / 1024.;
-				*vertex++ = glyph->yMin / 1024.;
-
-				*index++ = buffer.vertexCount + 0;
-				*index++ = buffer.vertexCount + 1;
-				*index++ = buffer.vertexCount + 3;
-
-				*index++ = buffer.vertexCount + 0;
-				*index++ = buffer.vertexCount + 3;
-				*index++ = buffer.vertexCount + 2;
-
-				x += glyph->advance;
-				buffer.vertexCount += 4;
-				buffer.indexCount += 6;
-			}
-		}
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), buffer.vertices);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), buffer.vertices + 2);
-		glDrawElements(GL_TRIANGLES, buffer.indexCount, GL_UNSIGNED_INT, buffer.indices);
+		gltPushText(&buffer, text, glyphs);
+		gltDraw(buffer);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
