@@ -19,7 +19,7 @@ source file.
 ...
 ```
 
-### Managing Fonts
+### Drawing Text
 
 Before drawing any text, you must create and bind a font.
 Currently, the only way to create a font is to load a font from a file using
@@ -30,8 +30,6 @@ You can use `gltCreateFont` to create the font and `gltBindFont` to bind it.
 GLuint font = gltCreateFont("/path/to/font.ttf");
 gltBindFont(font);
 ```
-
-### Drawing Text
 
 After binding the font, we can draw some text. There are two ways to draw text.
 The first is to use the functions `glDrawText` or `glDrawnText` to immediately
