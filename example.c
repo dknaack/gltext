@@ -68,7 +68,6 @@ int main(void)
 
 		char text[] = "Hello, world!";
 		float textWidth = gltMeasureTextWidth(text);
-		printf("%f\n", textWidth);
 
 		float x = floor(0.5f * (w - textWidth));
 		float y = floor(0.5f * (h - fontHeight));
