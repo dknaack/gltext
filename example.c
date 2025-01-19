@@ -46,6 +46,8 @@ keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods)
         glfwSetWindowShouldClose(win, GLFW_TRUE);
 }
 
+static GLuint gltProgram;
+
 static GLuint
 gltCreateShader(GLenum type, const char *source)
 {
@@ -130,6 +132,16 @@ gltOrtho(float left, float right, float bottom, float top, float zNear, float zF
 	gltUseProgram();
 	GLuint transformLocation = glGetUniformLocation(gltProgram, "transform");
 	glUniformMatrix4fv(transformLocation, 1, GL_TRUE, &matrix[0][0]);
+}
+
+static void
+gltDraw(GLTbuffer b)
+{
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b.vertices);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), b.vertices + 2);
+	glDrawElements(GL_TRIANGLES, b.indexCount, GL_UNSIGNED_INT, b.indices);
 }
 
 int main(void)
