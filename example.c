@@ -17,38 +17,38 @@ static const char *title = "Simple example";
 static void
 errorCallback(int err, const char *desc)
 {
-    fprintf(stderr, "GLFW Error: %s\n", desc);
+	fprintf(stderr, "GLFW Error: %s\n", desc);
 }
 
 static void
 keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(win, GLFW_TRUE);
 	}
 }
 
 int main(void)
 {
-    glfwSetErrorCallback(errorCallback);
-    if (!glfwInit()) {
+	glfwSetErrorCallback(errorCallback);
+	if (!glfwInit()) {
 		return 1;
 	}
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    GLFWwindow *window = glfwCreateWindow(640, 480, title, NULL, NULL);
-    if (!window) {
+	GLFWwindow *window = glfwCreateWindow(640, 480, title, NULL, NULL);
+	if (!window) {
 		glfwTerminate();
 		return 1;
 	}
 
 	glfwSetKeyCallback(window, keyCallback);
 
-    glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(window);
 	gladLoadGL((GLADloadfunc)glfwGetProcAddress);
-    glfwSwapInterval(1);
+	glfwSwapInterval(1);
 
 	float fontHeight = 48;
 	GLuint font = gltCreateFont("OpenSans.ttf", fontHeight);
@@ -72,11 +72,11 @@ int main(void)
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-    }
+	}
 
 	free(buffer.vertices);
 	free(buffer.indices);
-    glfwDestroyWindow(window);
-    glfwTerminate();
+	glfwDestroyWindow(window);
+	glfwTerminate();
 	return 0;
 }
