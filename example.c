@@ -9,11 +9,6 @@
 #include "glad.h"
 #include "gltext.h"
 
-static void errorCallback(int err, const char *desc);
-static void keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods);
-
-static const char *title = "Simple example";
-
 static void
 errorCallback(int err, const char *desc)
 {
@@ -38,6 +33,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
+	char *title = "Simple example";
 	GLFWwindow *window = glfwCreateWindow(640, 480, title, NULL, NULL);
 	if (!window) {
 		glfwTerminate();
