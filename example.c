@@ -54,7 +54,7 @@ int main(void)
 	 * Initialize the text API
 	 */
 
-	GLuint font = gltCreateFont("/usr/share/fonts/TTF/Arial.TTF", 16);
+	GLuint font = gltCreateFont("OpenSans.ttf", 16);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
